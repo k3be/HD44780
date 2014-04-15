@@ -327,10 +327,10 @@ int main(int argc, char **argv)
   int opt;
   char line_1[LCD_WIDTH] = "Hallo";
   char line_2[LCD_WIDTH] = "Welt!";
-  bool clear;
+  bool clear = false;
 
 
-  while((opt = getopt(argc, argv, "1:2:c:h")) != -1) {
+  while((opt = getopt(argc, argv, "1:2:ch")) != -1) {
     switch (opt) {
       case '1':
         strncpy(line_1, optarg, 16);
@@ -352,6 +352,9 @@ int main(int argc, char **argv)
   if (!bcm2835_init()) return 1;
 
   init_lcd();
+
+  if (clear) 
+    exit(EXIT_SUCCESS);
 
   set_curser(LCD_LINE_1);
   write_string(line_1);
