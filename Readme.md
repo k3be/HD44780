@@ -3,17 +3,19 @@ LCD Display control
 
 This program shows small text lines on LCD displays with the HD44780 chip. 
 Currently the 2 lines a 16 character display is supported. The neccessary 
-hardware is listed below: 
+hardware for testing is listed below: 
 
 * LCD1602A
 * a breadboard
-* jumper male/female
-* Klemmbrücken
+* jumper wires male/female
+* a jumper kit
 * a 3.3 k resistor
 * a 560 ohm resistor
 
-The program is written in C and uses the bcm2835 lib from Mike .... 
+Thanks for explaining the wiring to Matt Hawkins (http://www.raspberrypi-spy.co.uk).
+
+The program is written in C and uses the bcm2835 lib from Mike McCauley at http://www.airspayce.com/mikem/bcm2835/ 
 
 * bcm2835 lib 
 
-So get a copy 
+So get a copy and compile the lib:
