@@ -17,8 +17,27 @@ hardware for testing is listed below:
 
 Thanks for explaining the wiring to Matt Hawkins (http://www.raspberrypi-spy.co.uk).
 
-The program is written in C and uses the bcm2835 lib from Mike McCauley at http://www.airspayce.com/mikem/bcm2835/ 
-
-* bcm2835 lib 
-
+The program written in C and uses the bcm2835 lib from Mike McCauley at http://www.airspayce.com/mikem/bcm2835/ 
 So get a copy and compile the lib:
+
+```
+./configure 
+make
+sueo make install
+```
+
+Once the lib is installed you are ready to compile the test program. Clone this source and run make: 
+
+```
+git clone https://github.com/rheikvaneyck/HD44780.git
+cd HD44780
+make
+```
+
+To print some text on the display call the program with option -1 <text> for text on line 1 and -2 <text> for text on line 2:
+
+```
+sudo ./lcd_test -1 "Hallo Welt" -2 "Wie geht's?"
+```
+
+  
