@@ -1,10 +1,8 @@
 /*##############################################################*/
 /* Author: Marcus Nasarek                                       */
-/* File:   LCDH44780.h                                          */
+/* File:   LCDH44780.c                                          */
 /* Compile with:                                                */
-/*      gcc -Wall -lbcm2835 LCDHD44780.c -o lcdhd44780          */
-/* Help:                                                        */
-/*      lcdhd44780 -h                                           */
+/*      gcc -Wall -c LCDHD44780.c -o LCDHD44780.o               */
 /* License:                                                     */
 /*                                                              */
 /*  This program is free software; you can redistribute it      */ 
@@ -25,25 +23,13 @@
 /*                                                              */
 /*##############################################################*/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <bcm2835.h>
+
 #include "LCDHD44780.h"
-
-int print_usage(int errcode, char *program_name)
-{
-  fprintf(stderr,"%s \n", program_name);
-  fprintf(stderr,"Usage: \n");
-  fprintf(stderr,"  %s [options]\n", program_name);
-  fprintf(stderr,"\n");
-  fprintf(stderr,"  Invoking %s to set the Text of a HD44780 LCD 2x16 character display.\n", program_name);
-  fprintf(stderr,"\n");
-  fprintf(stderr,"  The following are the options, which must be a single letter\n");
-  fprintf(stderr,"    preceded by a '-' and followed by another character.\n");
-  fprintf(stderr,"    -1 <text> sets the text of line 1. Text is max 16 characters long.\n");
-  fprintf(stderr,"    -2 <text> sets the text of line 2. Text is max 16 characters long.\n");
-  fprintf(stderr,"    -c clears both lines of the display.\n");
-  fprintf(stderr,"\n");
-
-    return errcode;
-}
 
 void init_gpio(void)
 {
@@ -89,9 +75,9 @@ void init_lcd(void)
   DL = 1: 8 bits, DL = 0: 4 bits
   N = 1: 2 lines, N = 0: 1 line
   F = 1: 5
-  ×
+  Ã—
   10 dots, F = 0: 5
-  ×
+  Ã—
   8 dots
   BF = 1: Internally operating
   BF = 0: Instructions acceptable
@@ -103,7 +89,7 @@ void init_lcd(void)
   2. Function set:
       DL = 1; 8-bit interface data
       N = 0; 1-line display
-      F = 0; 5×8 dot character font
+      F = 0; 5Ã—8 dot character font
   3. Display on/off control:
       D = 0; Display off
       C = 0; Cursor off
@@ -320,50 +306,4 @@ void gpio_reset(void)
   bcm2835_gpio_clr(LCD_D5);
   bcm2835_gpio_clr(LCD_D6);
   bcm2835_gpio_clr(LCD_D7);
-}
-
-int main(int argc, char **argv) 
-{
-  int opt;
-  char line_1[LCD_WIDTH] = "Hallo";
-  char line_2[LCD_WIDTH] = "Welt!";
-  bool clear = false;
-
-
-  while((opt = getopt(argc, argv, "1:2:ch")) != -1) {
-    switch (opt) {
-      case '1':
-        strncpy(line_1, optarg, 16);
-        break;
-      case '2':
-        strncpy(line_2, optarg, 16);
-        break;
-      case 'c':
-        clear = true;
-        break;
-      case 'h':
-        print_usage(EXIT_SUCCESS, argv[0]);
-        break;
-      default:
-        exit(print_usage(EXIT_FAILURE, argv[0]));
-    }
-  }
-
-  if (!bcm2835_init()) return 1;
-
-  init_lcd();
-
-  if (clear) 
-    exit(EXIT_SUCCESS);
-
-  set_curser(LCD_LINE_1);
-  write_string(line_1);
-  set_curser(LCD_LINE_2);
-  write_string(line_2);  
-
-  gpio_reset();
-
-  bcm2835_close();
-
-  exit(EXIT_SUCCESS);
 }

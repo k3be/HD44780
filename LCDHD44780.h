@@ -1,3 +1,26 @@
+/*##############################################################*/
+/* Author: Marcus Nasarek                                       */
+/* File:   LCDH44780.h                                          */
+/* License:                                                     */
+/*                                                              */
+/*  This program is free software; you can redistribute it      */ 
+/*  and/or modify it under the terms of the GNU General         */  
+/*  Public License as published by the Free Software            */
+/*  Foundation; either version 3 of the License, or             */
+/*  (at your option) any later version.                         */
+/*                                                              */
+/*  This program is distributed in the hope that it will        */
+/*  be useful, but WITHOUT ANY WARRANTY; without even the       */
+/*  implied warranty of MERCHANTABILITY or                      */
+/*  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General       */
+/*  Public License for more details.                            */
+/*                                                              */
+/*  You should have received a copy of the GNU General          */
+/*  Public License along with this program; if not,             */
+/*  see <http://www.gnu.org/licenses/>.                         */
+/*                                                              */
+/*##############################################################*/
+
 // Thanks to Matt Hawkins (http://www.raspberrypi-spy.co.uk)
 // The wiring for the LCD is as follows:
 // 1 : GND
@@ -17,12 +40,15 @@
 // 15: LCD Backlight +5V**
 // 16: LCD Backlight GND
 
-#include <stdio.h>
+#ifndef _LCDHD44780_H_
+#define _LCDHD44780_H_
+
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 #include <bcm2835.h>
-#include <getopt.h>
 
 // Define GPIO pin to LCD pin mapping
 #define LCD_RS RPI_V2_GPIO_P1_26
@@ -73,3 +99,4 @@ void write_string(char *str);
 
 void gpio_reset(void);
 
+#endif
