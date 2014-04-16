@@ -5,7 +5,7 @@ This program shows small text lines on LCD displays with the HD44780 chip connec
 
 ![The HD44780 Display](https://dl.dropboxusercontent.com/u/40629133/HD44780/Display.jpg)
 
-Currently the 2 lines a 16 character display is supported. The neccessary 
+Currently the 2 lines a 16 characters display is supported. The neccessary 
 hardware for testing is listed below: 
 
 * LCD1602A
@@ -17,7 +17,7 @@ hardware for testing is listed below:
 
 Thanks for explaining the wiring to Matt Hawkins (http://www.raspberrypi-spy.co.uk).
 
-The program written in C and uses the bcm2835 lib from Mike McCauley at http://www.airspayce.com/mikem/bcm2835/ 
+The program is written in C and uses the bcm2835 lib from Mike McCauley at( http://www.airspayce.com/mikem/bcm2835/ )
 So get a copy and compile the lib:
 
 ```
