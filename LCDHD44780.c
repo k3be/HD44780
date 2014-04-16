@@ -23,12 +23,6 @@
 /*                                                              */
 /*##############################################################*/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <bcm2835.h>
-
 #include "LCDHD44780.h"
 
 void init_gpio(void)
@@ -99,7 +93,7 @@ void init_lcd(void)
       S = 0; No shift
   */ 
   
-  // begin of "what is that for?"
+  // begin of "warming up"
   // see fig 24 on page 46 of datasheet
   
   // Function set - 
@@ -132,8 +126,20 @@ void init_lcd(void)
   write_to_lcd(0x32, LCD_CMD);
   bcm2835_delayMicroseconds(R_EXEC_TIME);
   
-  // end of "what is that for?"
+  // end of "warming up"
   
+  lcd_function_set(LCD_FUNCTION_SET | TWO_LINES);
+
+  lcd_control(LCD_CONTROL | DISPLAY_ON);
+
+  lcd_entry_mode(LCD_ENTRY_MODE | ADDR_INCREMENT);
+  
+  clear_lcd();
+  
+}
+
+void lcd_function_set(uint8_t control_flags)
+{
   // Function set - 
   // Sets interface data length
   // (DL), number of display lines
@@ -146,9 +152,12 @@ void init_lcd(void)
   // F = 1 --> 5x10 dot character font
   // 0x28 = 
   // 0  0   0   0   1   0    1  0   0   0
-  write_to_lcd(0x28, LCD_CMD);
-  bcm2835_delayMicroseconds(R_EXEC_TIME);
-  
+  write_to_lcd(control_flags, LCD_CMD);
+  bcm2835_delayMicroseconds(R_EXEC_TIME);  
+}
+
+void lcd_control(uint8_t control_flags)
+{
   // Display on/off control - 
   // Sets entire display (D) on/off,
   // cursor on/off (C), and
@@ -159,9 +168,12 @@ void init_lcd(void)
   // D = 1 --> display on
   // C = 0 --> cursor off
   // B = 0 --> blinking off
-  write_to_lcd(0x0C, LCD_CMD);
+  write_to_lcd(control_flags, LCD_CMD);
   bcm2835_delayMicroseconds(R_EXEC_TIME);
-  
+}
+
+void lcd_entry_mode(uint8_t control_flags)
+{
   // Entry mode set -
   // Sets cursor move direction
   // and specifies display shift.
@@ -175,8 +187,10 @@ void init_lcd(void)
   // I/D = 1 --> increment
   // S = 0 --> no shift 
   write_to_lcd(0x06, LCD_CMD);
-  bcm2835_delayMicroseconds(R_EXEC_TIME);
-  
+  bcm2835_delayMicroseconds(R_EXEC_TIME);  
+}
+
+void clear_lcd(void) {
   // Clear display - 
   // Clears entire display and
   // sets DDRAM address 0 in
@@ -184,11 +198,29 @@ void init_lcd(void)
   // RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0 
   // 0  0   0   0   0   0   0   0   0   1
   write_to_lcd(0x01, LCD_CMD);  
-  bcm2835_delayMicroseconds(R_EXEC_TIME);
-  
+  bcm2835_delayMicroseconds(R_EXEC_TIME);  
 }
 
-void set_curser(uint8_t addr)
+void display_off(void)
+{
+  lcd_control(LCD_CONTROL);
+}
+
+void show_cursor(bool on)
+{
+  uint8_t cursor_flag;
+  cursor_flag = ( on ? CURSOR_ON : 0x00);
+  lcd_control(LCD_CONTROL|DISPLAY_ON|cursor_flag);
+}
+
+void cursor_blinking(bool on)
+{
+  uint8_t flag;
+  flag = ( on ? BLINKING_ON : 0x00);
+  lcd_control(LCD_CONTROL|DISPLAY_ON|flag);  
+}
+
+void set_cursor(uint8_t addr)
 {
   // Set DDRAM address
   // RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0 

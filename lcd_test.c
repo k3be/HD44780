@@ -2,6 +2,8 @@
 /* Author: Marcus Nasarek                                       */
 /* File:   lcd_test.c                                           */
 /* Compile with:                                                */
+/*      gcc -Wall -c LCDHD44780.c -o LCDHD44780.o               */
+/*      gcc -Wall -c lcd_test.c -o lcd_test.o                   */
 /*      gcc -Wall lcd_test.o LCDHD44780.o -lbcm2835 -o lcd_test */
 /* Help:                                                        */
 /*      lcd_test -h                                             */
@@ -57,6 +59,7 @@ int print_usage(int errcode, char *program_name)
   fprintf(stderr,"    -1 <text> sets the text of line 1. Text is max 16 characters long.\n");
   fprintf(stderr,"    -2 <text> sets the text of line 2. Text is max 16 characters long.\n");
   fprintf(stderr,"    -c clears both lines of the display.\n");
+  fprintf(stderr,"    -p leave the text on the display. Cannot be used with -c\n");
   fprintf(stderr,"\n");
 
     return errcode;
@@ -68,11 +71,12 @@ int main(int argc, char **argv)
   char line_1[LCD_WIDTH];
   char line_2[LCD_WIDTH];
   bool clear = false;
+  bool keep = false;
   bool line_1_set = false;
   bool line_2_set = false;
 
 
-  while((opt = getopt(argc, argv, "1:2:ch")) != -1) {
+  while((opt = getopt(argc, argv, "1:2:cph")) != -1) {
     switch (opt) {
       case '1':
         strncpy(line_1, optarg, 16);
@@ -84,6 +88,10 @@ int main(int argc, char **argv)
         break;
       case 'c':
         clear = true;
+        break;
+      case 'p':
+        clear = false;
+        keep = true;
         break;
       case 'h':
         print_usage(EXIT_SUCCESS, argv[0]);
@@ -102,16 +110,51 @@ int main(int argc, char **argv)
 
   if (!(line_1_set || line_2_set)) {
     strcpy(line_1, "Hallo");
-    strcpy(line_2, "Welt!");
+    strcpy(line_2, "Ciao Bella!");
+
+    set_cursor(LCD_LINE_1);
+    write_string(line_1);  
+
+    delay(2000);
+
+    set_cursor(0x86);
+    show_cursor(true);
+
+    delay(2000);
+
+    write_string("Welt!");
+
+    delay(2000);
+
+    set_cursor(LCD_LINE_2);
+    
+    cursor_blinking(true);
+
+    delay(2000);
+
+    write_string(line_2);   
+  } 
+  else 
+  {
+    if (line_1_set) {
+      set_cursor(LCD_LINE_1);
+      write_string(line_1);        
+    }
+    if (line_2_set) {
+      set_cursor(LCD_LINE_2);
+      write_string(line_2);      
+    }
   }
 
-  set_curser(LCD_LINE_1);
-  write_string(line_1);
+  delay(2000);
 
-  set_curser(LCD_LINE_2);
-  write_string(line_2);      
-  
-  gpio_reset();
+  if (!keep) {
+    clear_lcd();
+
+    display_off();
+    
+    gpio_reset();    
+  }
 
   bcm2835_close();
 

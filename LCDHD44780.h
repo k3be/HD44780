@@ -64,6 +64,57 @@
 #define LCD_DATA HIGH 
 #define LCD_CMD LOW
 
+// Function set - 
+// Sets interface data length
+// (DL), number of display lines
+// (N), and character font (F).
+// RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0 
+// 0  0   0   0   1   DL   N   F   -   -  
+// DL = 0 --> 4 bit data length (1 = 8 bit)
+// N = 1 --> 2 line display (0 = 1 line)
+// F = 0 --> 5x8 dot character font
+// F = 1 --> 5x10 dot character font
+// 0x28 = 
+// 0  0   0   0   1   0    1  0   0   0
+#define LCD_FUNCTION_SET 0x20
+#define DATA_LENGTH      0x10
+#define TWO_LINES        0x08
+#define BIG_FONT_SET     0x04
+
+
+
+// Display control flags
+// Sets entire display (D) on/off,
+// cursor on/off (C), and
+// blinking of cursor position
+// character (B).
+// RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0 
+// 0  0   0   0   0   0   1   D   C   B
+// D = 1 --> display on
+// C = 0 --> cursor off
+// B = 0 --> blinking off
+#define LCD_CONTROL 0x08 // display control
+#define DISPLAY_ON  0x04 
+#define CURSOR_ON	0x02
+#define BLINKING_ON 0x01
+
+// Entry mode set -
+// Sets cursor move direction
+// and specifies display shift.
+// These operations are
+// performed during data write
+// and read.  
+// Execution time 37us
+// RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0 
+// 0  0   0   0   0   0   0   1   I/D S
+// I/D = increment/decrement address pointer
+// I/D = 1 --> increment
+// S = 0 --> no shift 
+#define LCD_ENTRY_MODE 0x04
+#define ADDR_INCREMENT 0x02
+#define LINE_SHIFT	   0x01
+
+
 // LCD DDRAM address for the 1st line
 // bits DB0..DB6 --> 0x00..0x4F
 // DB7 = 1 --> offset = 0x80
@@ -91,7 +142,21 @@ void init_gpio(void);
 
 void init_lcd(void);
 
-void set_curser(uint8_t addr);
+void lcd_function_set(uint8_t control_flags);
+
+void lcd_control(uint8_t control_flags);
+
+void lcd_entry_mode(uint8_t control_flags);
+
+void clear_lcd(void);
+
+void set_cursor(uint8_t addr);
+
+void display_off(void);
+
+void show_cursor(bool on);
+
+void cursor_blinking(bool on);
 
 void write_to_lcd(uint8_t byte, uint8_t mode);
 
