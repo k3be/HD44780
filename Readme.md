@@ -1,7 +1,7 @@
-LCD Display control
-===================
+Raspberry Pi v2 LCD Display control
+===================================
 
-This program shows small text lines on LCD displays with the HD44780 chip. 
+This program shows small text lines on LCD displays with the HD44780 chip connected to the GPIO ports of a Raspberry Pi V2. 
 
 ![The HD44780 Display](https://dl.dropboxusercontent.com/u/40629133/HD44780/Display.jpg)
 
