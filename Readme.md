@@ -2,6 +2,9 @@ LCD Display control
 ===================
 
 This program shows small text lines on LCD displays with the HD44780 chip. 
+
+![The HD44780 Display](https://dl.dropboxusercontent.com/u/40629133/HD44780/Display.jpg)
+
 Currently the 2 lines a 16 character display is supported. The neccessary 
 hardware for testing is listed below: 
 
