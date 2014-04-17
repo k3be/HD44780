@@ -10,7 +10,7 @@ hardware for testing is listed below:
 
 * [LCD1602A](https://www.google.de/#q=HD44780+2x16+buy)
 * [a breadboard](https://www.google.de/#q=Steckbrett+buy)
-* [jumper wires male/female](https://www.google.de/#q=Steckbrett+Kabelset+buy)
+* [jumper wires male/female](https://www.google.de/#q=Jumper-Cable+m-f+kit+buy)
 * [a jumper kit](https://www.google.de/#q=Jumper-Cable+kit+buy)
 * [a 3.3 k resistor](https://www.google.de/#q=3.3k+ohm+resistor+buy)
 * [a 560 ohm resistor](https://www.google.de/#q=560+ohm+0.25+W+resistor+buy)
