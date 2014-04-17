@@ -9,11 +9,11 @@ Currently the 2 lines a 16 characters display is supported. The neccessary
 hardware for testing is listed below: 
 
 * [LCD1602A](https://www.google.de/#q=HD44780+2x16+buy)
-* a breadboard
-* jumper wires male/female
-* a jumper kit
-* a 3.3 k resistor
-* a 560 ohm resistor
+* [a breadboard](https://www.google.de/#q=Steckbrett+buy)
+* [jumper wires male/female](https://www.google.de/#q=Steckbrett+Kabelset+buy)
+* [a jumper kit](https://www.google.de/#q=Jumper-Cable+kit+buy)
+* [a 3.3 k resistor](https://www.google.de/#q=3.3k+ohm+resistor+buy)
+* [a 560 ohm resistor](https://www.google.de/#q=560+ohm+0.25+W+resistor+buy)
 
 Thanks to Matt Hawkins (http://www.raspberrypi-spy.co.uk) for explaining the wiring.
 
