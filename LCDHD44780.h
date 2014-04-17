@@ -136,8 +136,6 @@
 #define R_EXEC_TIME 50    // us
 #define GPIO_RISING 10    // ms
 
-int print_usage(int errcode, char *program_name);
-
 void init_gpio(void);
 
 void init_lcd(void);
