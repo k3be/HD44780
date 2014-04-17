@@ -8,7 +8,7 @@ This program shows small text lines on LCD displays with the HD44780 chip connec
 Currently the 2 lines a 16 characters display is supported. The neccessary 
 hardware for testing is listed below: 
 
-* LCD1602A
+* [LCD1602A](https://www.google.de/#q=HD44780+2x16+buy)
 * a breadboard
 * jumper wires male/female
 * a jumper kit
