@@ -15,7 +15,7 @@ hardware for testing is listed below:
 * a 3.3 k resistor
 * a 560 ohm resistor
 
-Thanks for explaining the wiring to Matt Hawkins (http://www.raspberrypi-spy.co.uk).
+Thanks to Matt Hawkins (http://www.raspberrypi-spy.co.uk) for explaining the wiring.
 
 The program is written in C and uses the bcm2835 lib from Mike McCauley at( http://www.airspayce.com/mikem/bcm2835/ )
 So get a copy and compile the lib:
@@ -23,7 +23,7 @@ So get a copy and compile the lib:
 ```
 ./configure 
 make
-sueo make install
+sudo make install
 ```
 
 Once the lib is installed you are ready to compile the test program. Clone this source and run make: 
