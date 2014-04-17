@@ -186,7 +186,7 @@ void lcd_entry_mode(uint8_t control_flags)
   // I/D = increment/decrement address pointer
   // I/D = 1 --> increment
   // S = 0 --> no shift 
-  write_to_lcd(0x06, LCD_CMD);
+  write_to_lcd(control_flags, LCD_CMD);
   bcm2835_delayMicroseconds(R_EXEC_TIME);  
 }
 
