@@ -156,8 +156,6 @@
 
 #define MAX_WAIT 100
 
-int print_usage(int errcode, char *program_name);
-
 void init_gpio(void);
 
 void init_lcd(void);
