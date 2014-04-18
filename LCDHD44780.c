@@ -29,6 +29,7 @@ void init_gpio(void)
 {
   // Set all pins to output
   bcm2835_gpio_fsel(LCD_RS, BCM2835_GPIO_FSEL_OUTP);
+  bcm2835_gpio_fsel(LCD_RW, BCM2835_GPIO_FSEL_OUTP);
   bcm2835_gpio_fsel(LCD_D4, BCM2835_GPIO_FSEL_OUTP);
   bcm2835_gpio_fsel(LCD_D5, BCM2835_GPIO_FSEL_OUTP);
   bcm2835_gpio_fsel(LCD_D6, BCM2835_GPIO_FSEL_OUTP);
@@ -39,6 +40,7 @@ void init_gpio(void)
   
   // Set all pins to LOW
   bcm2835_gpio_clr(LCD_RS);
+  bcm2835_gpio_clr(LCD_RW);
   bcm2835_gpio_clr(LCD_D4);
   bcm2835_gpio_clr(LCD_D5);
   bcm2835_gpio_clr(LCD_D5);
@@ -47,15 +49,99 @@ void init_gpio(void)
   
 }
 
+void set_data_pins_to_output(void)
+{
+    // set data pins to output 
+  bcm2835_gpio_fsel(LCD_D7, BCM2835_GPIO_FSEL_OUTP);
+  bcm2835_gpio_fsel(LCD_D6, BCM2835_GPIO_FSEL_OUTP);
+  bcm2835_gpio_fsel(LCD_D5, BCM2835_GPIO_FSEL_OUTP);
+  bcm2835_gpio_fsel(LCD_D4, BCM2835_GPIO_FSEL_OUTP);
+}
+
+void set_data_pins_to_input(void)
+{
+  // set data pins to input 
+  bcm2835_gpio_fsel(LCD_D7, BCM2835_GPIO_FSEL_INPT);
+  bcm2835_gpio_fsel(LCD_D6, BCM2835_GPIO_FSEL_INPT);
+  bcm2835_gpio_fsel(LCD_D5, BCM2835_GPIO_FSEL_INPT);
+  bcm2835_gpio_fsel(LCD_D4, BCM2835_GPIO_FSEL_INPT);
+}
+
+void pulse_e(void)
+{
+  // Toogle ENABLE pin in us 
+  // bcm2835_gpio_fsel(LCD_E, BCM2835_GPIO_FSEL_OUTP);
+  bcm2835_delayMicroseconds(E_DELAY);
+  bcm2835_gpio_set(LCD_E);  
+  bcm2835_delayMicroseconds(E_DATA_PULSE);
+  bcm2835_gpio_clr(LCD_E); 
+  (LCD_DATA) ? bcm2835_delayMicroseconds(E_DATA_PULSE) :bcm2835_delayMicroseconds(E_CMD_PULSE);
+}
+
+uint8_t busy_wait(void)
+{
+  // FIXME: this function does not work!
+
+  uint8_t addr;
+  bool wait = true;
+  uint16_t counter = 0;
+
+  set_data_pins_to_input();
+
+  bcm2835_gpio_clr(LCD_RS);
+  bcm2835_gpio_set(LCD_RW);
+
+  while(wait && (counter < MAX_WAIT))
+  {
+    addr = 0;
+    pulse_e();
+
+    // read high bits
+    if (bcm2835_gpio_lev(LCD_D4))
+      addr = (addr | 0x10);
+    if (bcm2835_gpio_lev(LCD_D5))
+      addr = (addr | 0x20);
+    if (bcm2835_gpio_lev(LCD_D6))
+      addr = (addr | 0x40);
+    if (bcm2835_gpio_lev(LCD_D7))
+      addr = (addr | 0x80);
+
+    // Toogle ENABLE pin in us 
+    pulse_e();
+
+    // read low bits
+    if (bcm2835_gpio_lev(LCD_D4))
+      addr = (addr | 0x01);
+    if (bcm2835_gpio_lev(LCD_D5))
+      addr = (addr | 0x02);
+    if (bcm2835_gpio_lev(LCD_D6))
+      addr = (addr | 0x04);
+    if (bcm2835_gpio_lev(LCD_D7))
+      addr = (addr | 0x08);
+
+    wait = (addr & 0x80);
+    counter += 1;
+
+    bcm2835_delay(1);
+  }
+
+  bcm2835_gpio_clr(LCD_RW);
+  set_data_pins_to_output();
+
+  // return address but mask out highest bit (busy flag)
+  // 0x7F = 0 1 1 1  1 1 1 1
+  return (addr & 0x7F);
+}
+
 void init_lcd(void)
 {
   init_gpio();
+
   /* 
   The busy flag (BF) is kept in the busy state
   until the initialization ends (BF = 1). The 
   busy state lasts for 10 ms after VCC rises to 4.5 V
   */
-  bcm2835_delay(GPIO_RISING);
 
   /*
   --- symbols:
@@ -230,6 +316,11 @@ void set_cursor(uint8_t addr)
   // fprintf(stdout,"cursor on addr: 0x%0x\n", addr);  
 }
 
+void shift_display(uint8_t mode, uint8_t direction)
+{
+  lcd_control(CURSOR_DISPLAY_SHIFT | mode | direction);
+}
+
 void write_to_lcd(uint8_t byte, uint8_t mode)
 {
   switch (mode) {
@@ -239,7 +330,6 @@ void write_to_lcd(uint8_t byte, uint8_t mode)
       break;
     case LCD_DATA:
       bcm2835_gpio_set(LCD_RS);
-      //bcm2835_delay(5);
       // fprintf(stdout, "Set RS to data mode for '%c'\n", byte);
       break;
     default:
@@ -267,11 +357,7 @@ void write_to_lcd(uint8_t byte, uint8_t mode)
   }
 
   // Toogle ENABLE pin in us 
-  bcm2835_delayMicroseconds(E_DELAY);
-  bcm2835_gpio_set(LCD_E);  
-  bcm2835_delayMicroseconds(E_DATA_PULSE);
-  bcm2835_gpio_clr(LCD_E); 
-  (LCD_DATA) ? bcm2835_delayMicroseconds(E_DATA_PULSE) :bcm2835_delayMicroseconds(E_CMD_PULSE); 
+  pulse_e();
 
   // write low bits
   bcm2835_gpio_clr(LCD_D4);
@@ -292,28 +378,83 @@ void write_to_lcd(uint8_t byte, uint8_t mode)
     bcm2835_gpio_set(LCD_D7);
   }
 
-  // Toogle ENABLE pin in us 
-  // bcm2835_gpio_fsel(LCD_E, BCM2835_GPIO_FSEL_OUTP);
-  bcm2835_delayMicroseconds(E_DELAY);
-  bcm2835_gpio_set(LCD_E);  
-  bcm2835_delayMicroseconds(E_DATA_PULSE);
-  bcm2835_gpio_clr(LCD_E); 
-  (LCD_DATA) ? bcm2835_delayMicroseconds(E_DATA_PULSE) :bcm2835_delayMicroseconds(E_CMD_PULSE);
+  pulse_e();
   
 }
 
 void write_string(char *str)
 {
-  uint16_t len = (strlen(str) > 16 ? 16 : strlen(str));
-  char message[16];
   uint16_t i;
+  uint8_t len = 0;
 
-  memset(message, 0x20, 16);
-  memcpy(message, str, len);
+  len = (strlen(str) > LCD_WIDTH ? LCD_WIDTH : strlen(str));
 
-  for (i=0; i<LCD_WIDTH;i++) {
-    write_to_lcd(message[i], LCD_DATA);
+  for (i=0; i<len;i++) {
+    write_to_lcd(str[i], LCD_DATA);
   }
+}
+
+uint8_t read_from_lcd(uint8_t mode)
+{
+  // FIXME: this function does not work!
+  uint8_t addr = 0x00;
+
+  bcm2835_gpio_clr(LCD_E);
+
+  bcm2835_gpio_clr(LCD_D4);
+  bcm2835_gpio_clr(LCD_D5);
+  bcm2835_gpio_clr(LCD_D6);
+  bcm2835_gpio_clr(LCD_D7);
+
+  switch (mode) {
+    case LCD_CMD:
+      bcm2835_gpio_clr(LCD_RS);
+      // fprintf(stdout, "Set RS to cmd mode\n");
+      break;
+    case LCD_DATA:
+      bcm2835_gpio_set(LCD_RS);
+      // fprintf(stdout, "Set RS to data mode for '%c'\n", byte);
+      break;
+    default:
+      // fprintf(stderr, "mode for setting GPIO pin unknown: %i\n", mode);
+      exit(EXIT_FAILURE);
+  }
+
+  set_data_pins_to_input();
+  bcm2835_delay(5);
+
+  bcm2835_gpio_set(LCD_RW);
+
+  pulse_e();
+
+  // read high bits
+  if (bcm2835_gpio_lev(LCD_D4))
+    addr = (addr | 0x10);
+  if (bcm2835_gpio_lev(LCD_D5))
+    addr = (addr | 0x20);
+  if (bcm2835_gpio_lev(LCD_D6))
+    addr = (addr | 0x40);
+  if (bcm2835_gpio_lev(LCD_D7))
+    addr = (addr | 0x80);
+
+  // Toogle ENABLE pin in us 
+  pulse_e();
+
+  // read low bits
+  if (bcm2835_gpio_lev(LCD_D4))
+    addr = (addr | 0x01);
+  if (bcm2835_gpio_lev(LCD_D5))
+    addr = (addr | 0x02);
+  if (bcm2835_gpio_lev(LCD_D6))
+    addr = (addr | 0x04);
+  if (bcm2835_gpio_lev(LCD_D7))
+    addr = (addr | 0x08);
+
+  bcm2835_gpio_clr(LCD_RW);
+
+  set_data_pins_to_output();
+
+  return addr;
 }
 
 void gpio_reset(void)
@@ -333,6 +474,7 @@ void gpio_reset(void)
   // bcm2835_gpio_fsel(LCD_D7, BCM2835_GPIO_FSEL_INPT);
 
   bcm2835_gpio_clr(LCD_RS);
+  bcm2835_gpio_clr(LCD_RW);
   bcm2835_gpio_clr(LCD_E);
   bcm2835_gpio_clr(LCD_D4);
   bcm2835_gpio_clr(LCD_D5);

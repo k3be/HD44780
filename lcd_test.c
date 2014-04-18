@@ -74,6 +74,7 @@ int main(int argc, char **argv)
   bool keep = false;
   bool line_1_set = false;
   bool line_2_set = false;
+  uint8_t data = 0x00;
 
 
   while((opt = getopt(argc, argv, "1:2:cph")) != -1) {
@@ -123,6 +124,29 @@ int main(int argc, char **argv)
     delay(2000);
 
     write_string("Welt!");
+
+    delay(1000);
+
+    shift_display(DISPLAY_SHIFT, SHIFT_RIGHT);
+
+    delay(1000);
+
+    shift_display(DISPLAY_SHIFT, SHIFT_RIGHT);
+
+    delay(1000);
+
+    shift_display(DISPLAY_SHIFT, SHIFT_RIGHT);
+
+    delay(1000);
+
+    shift_display(CURSOR_SHIFT, SHIFT_LEFT);
+    write_string("?");
+
+    delay(2000);
+
+    shift_display(DISPLAY_SHIFT, SHIFT_LEFT);
+    shift_display(DISPLAY_SHIFT, SHIFT_LEFT);
+    shift_display(DISPLAY_SHIFT, SHIFT_LEFT);
 
     delay(2000);
 

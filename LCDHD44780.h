@@ -27,7 +27,7 @@
 // 2 : 5V
 // 3 : Contrast (0-5V)*
 // 4 : RS (Register Select)
-// 5 : R/W (Read Write)       - GROUND THIS PIN
+// 5 : R/W (Read Write)       -> V2_GPIO_P1_P8
 // 6 : Enable or Strobe
 // 7 : Data Bit 0             - NOT USED
 // 8 : Data Bit 1             - NOT USED
@@ -52,6 +52,7 @@
 
 // Define GPIO pin to LCD pin mapping
 #define LCD_RS RPI_V2_GPIO_P1_26
+#define LCD_RW RPI_V2_GPIO_P1_08 // differs from Hawking's wiring
 #define LCD_E  RPI_V2_GPIO_P1_24
 #define LCD_D4 RPI_V2_GPIO_P1_22 
 #define LCD_D5 RPI_V2_GPIO_P1_18
@@ -114,6 +115,23 @@
 #define ADDR_INCREMENT 0x02
 #define LINE_SHIFT	   0x01
 
+// Cursor or display shift -
+// Moves the cursor and shifts
+// display without chaning
+// DDRAM contents. 
+// Execution time 37us
+// RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0 
+// 0  0   0   0   0   1   S/C R/L -   -
+// S/C = cursor/display shift
+// S/C = 0 --> cursor shift
+// R/L = shift direction
+// R/L = 1 --> shift to right  
+#define CURSOR_DISPLAY_SHIFT 0x10
+#define CURSOR_SHIFT         0x00
+#define DISPLAY_SHIFT        0x08
+#define SHIFT_RIGHT          0x04
+#define SHIFT_LEFT           0x00
+
 
 // LCD DDRAM address for the 1st line
 // bits DB0..DB6 --> 0x00..0x4F
@@ -136,6 +154,8 @@
 #define R_EXEC_TIME 50    // us
 #define GPIO_RISING 10    // ms
 
+#define MAX_WAIT 100
+
 int print_usage(int errcode, char *program_name);
 
 void init_gpio(void);
@@ -152,15 +172,21 @@ void clear_lcd(void);
 
 void set_cursor(uint8_t addr);
 
+uint8_t busy_wait(void);
+
 void display_off(void);
 
 void show_cursor(bool on);
 
 void cursor_blinking(bool on);
 
+void shift_display(uint8_t mode, uint8_t direction);
+
 void write_to_lcd(uint8_t byte, uint8_t mode);
 
 void write_string(char *str);
+
+uint8_t read_from_lcd(uint8_t mode);
 
 void gpio_reset(void);
 
