@@ -81,6 +81,10 @@ void pulse_e(void)
 uint8_t busy_wait(void)
 {
   // FIXME: this function does not work!
+  // With RW grounded it shouldn't work.
+  // But as long as the display is driven
+  // by 5V the GPIO ports on a raspberry pi
+  // would get to much voltage
 
   uint8_t addr;
   bool wait = true;
@@ -214,11 +218,11 @@ void init_lcd(void)
   
   // end of "warming up"
   
-  lcd_function_set(LCD_FUNCTION_SET | TWO_LINES);
+  lcd_function_set(TWO_LINES);
 
-  lcd_control(LCD_CONTROL | DISPLAY_ON);
+  lcd_control(DISPLAY_ON);
 
-  lcd_entry_mode(LCD_ENTRY_MODE | ADDR_INCREMENT);
+  lcd_entry_mode(ADDR_INCREMENT);
   
   clear_lcd();
   
@@ -238,7 +242,7 @@ void lcd_function_set(uint8_t control_flags)
   // F = 1 --> 5x10 dot character font
   // 0x28 = 
   // 0  0   0   0   1   0    1  0   0   0
-  write_to_lcd(control_flags, LCD_CMD);
+  write_to_lcd(LCD_FUNCTION_SET | control_flags, LCD_CMD);
   bcm2835_delayMicroseconds(R_EXEC_TIME);  
 }
 
@@ -254,7 +258,24 @@ void lcd_control(uint8_t control_flags)
   // D = 1 --> display on
   // C = 0 --> cursor off
   // B = 0 --> blinking off
-  write_to_lcd(control_flags, LCD_CMD);
+  write_to_lcd(LCD_CONTROL | control_flags, LCD_CMD);
+  bcm2835_delayMicroseconds(R_EXEC_TIME);
+}
+
+void lcd_shift_control(uint8_t control_flags)
+{
+  // Cursor or display shift -
+  // Moves the cursor and shifts
+  // display without chaning
+  // DDRAM contents. 
+  // Execution time 37us
+  // RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0 
+  // 0  0   0   0   0   1   S/C R/L -   -
+  // S/C = cursor/display shift
+  // S/C = 0 --> cursor shift
+  // R/L = shift direction
+  // R/L = 1 --> shift to right
+  write_to_lcd(CURSOR_DISPLAY_SHIFT | control_flags, LCD_CMD);
   bcm2835_delayMicroseconds(R_EXEC_TIME);
 }
 
@@ -272,7 +293,7 @@ void lcd_entry_mode(uint8_t control_flags)
   // I/D = increment/decrement address pointer
   // I/D = 1 --> increment
   // S = 0 --> no shift 
-  write_to_lcd(control_flags, LCD_CMD);
+  write_to_lcd(LCD_ENTRY_MODE | control_flags, LCD_CMD);
   bcm2835_delayMicroseconds(R_EXEC_TIME);  
 }
 
@@ -287,23 +308,38 @@ void clear_lcd(void) {
   bcm2835_delayMicroseconds(R_EXEC_TIME);  
 }
 
+void return_home(void)
+{
+  // Return home - 
+  // Sets DDRAM address to 0
+  // in address counter. Also 
+  // returns display from being 
+  // shifted to original position
+  // DDRAM contents remains unchanged
+  // RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0 
+  // 0  0   0   0   0   0   0   0   1   -
+  write_to_lcd(0x02, LCD_CMD);  
+  bcm2835_delayMicroseconds(R_EXEC_TIME);  
+}
+
+
 void display_off(void)
 {
-  lcd_control(LCD_CONTROL);
+  lcd_control(DISPLAY_OFF);
 }
 
 void show_cursor(bool on)
 {
   uint8_t cursor_flag;
   cursor_flag = ( on ? CURSOR_ON : 0x00);
-  lcd_control(LCD_CONTROL|DISPLAY_ON|cursor_flag);
+  lcd_control(DISPLAY_ON | cursor_flag);
 }
 
 void cursor_blinking(bool on)
 {
-  uint8_t flag;
-  flag = ( on ? BLINKING_ON : 0x00);
-  lcd_control(LCD_CONTROL|DISPLAY_ON|flag);  
+  uint8_t blinking_flag;
+  blinking_flag = ( on ? BLINKING_ON : 0x00);
+  lcd_control(DISPLAY_ON | blinking_flag);  
 }
 
 void set_cursor(uint8_t addr)
@@ -316,9 +352,14 @@ void set_cursor(uint8_t addr)
   // fprintf(stdout,"cursor on addr: 0x%0x\n", addr);  
 }
 
-void shift_display(uint8_t mode, uint8_t direction)
+void shift_cursor(uint8_t direction)
 {
-  lcd_control(CURSOR_DISPLAY_SHIFT | mode | direction);
+  lcd_shift_control(CURSOR_SHIFT | direction);
+}
+
+void shift_display(uint8_t direction)
+{
+  lcd_shift_control(DISPLAY_SHIFT | direction);
 }
 
 void write_to_lcd(uint8_t byte, uint8_t mode)
@@ -396,7 +437,10 @@ void write_string(char *str)
 
 uint8_t read_from_lcd(uint8_t mode)
 {
-  // FIXME: this function does not work!
+  // FIXME: this function currently does not work!
+  // Assuming, the display is driven by 5V  
+  // then the GPIO Ports on a Raspberry Pi
+  // would get 5V what definitly is too much
   uint8_t addr = 0x00;
 
   bcm2835_gpio_clr(LCD_E);

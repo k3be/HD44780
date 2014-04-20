@@ -27,7 +27,7 @@
 // 2 : 5V
 // 3 : Contrast (0-5V)*
 // 4 : RS (Register Select)
-// 5 : R/W (Read Write)       -> V2_GPIO_P1_P8
+// 5 : R/W (Read Write)       - GROUND THIS PIN
 // 6 : Enable or Strobe
 // 7 : Data Bit 0             - NOT USED
 // 8 : Data Bit 1             - NOT USED
@@ -96,6 +96,7 @@
 // B = 0 --> blinking off
 #define LCD_CONTROL 0x08 // display control
 #define DISPLAY_ON  0x04 
+#define DISPLAY_OFF 0x00
 #define CURSOR_ON	0x02
 #define BLINKING_ON 0x01
 
@@ -166,6 +167,8 @@ void lcd_control(uint8_t control_flags);
 
 void lcd_entry_mode(uint8_t control_flags);
 
+void lcd_shift_control(uint8_t control_flags);
+
 void clear_lcd(void);
 
 void set_cursor(uint8_t addr);
@@ -178,7 +181,11 @@ void show_cursor(bool on);
 
 void cursor_blinking(bool on);
 
-void shift_display(uint8_t mode, uint8_t direction);
+void shift_cursor(uint8_t direction);
+
+void shift_display(uint8_t direction);
+
+void return_home(void);
 
 void write_to_lcd(uint8_t byte, uint8_t mode);
 

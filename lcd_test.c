@@ -58,6 +58,8 @@ int print_usage(int errcode, char *program_name)
   fprintf(stderr,"    preceded by a '-' and followed by another character.\n");
   fprintf(stderr,"    -1 <text> sets the text of line 1. Text is max 16 characters long.\n");
   fprintf(stderr,"    -2 <text> sets the text of line 2. Text is max 16 characters long.\n");
+  fprintf(stderr,"    -t play test sequenz.\n");
+  fprintf(stderr,"    -s show all display characters.\n");
   fprintf(stderr,"    -c clears both lines of the display.\n");
   fprintf(stderr,"    -p leave the text on the display. Cannot be used with -c\n");
   fprintf(stderr,"\n");
@@ -68,16 +70,20 @@ int print_usage(int errcode, char *program_name)
 int main(int argc, char **argv) 
 {
   int opt;
+  uint8_t idx;
+  uint8_t ddram_position;
   char line_1[LCD_WIDTH];
   char line_2[LCD_WIDTH];
+  bool tests = false;
+  bool test_sequenz = false;
+  bool show_characters = false;
   bool clear = false;
   bool keep = false;
   bool line_1_set = false;
   bool line_2_set = false;
-  uint8_t data = 0x00;
 
 
-  while((opt = getopt(argc, argv, "1:2:cph")) != -1) {
+  while((opt = getopt(argc, argv, "1:2:tscph")) != -1) {
     switch (opt) {
       case '1':
         strncpy(line_1, optarg, 16);
@@ -86,6 +92,14 @@ int main(int argc, char **argv)
       case '2':
         strncpy(line_2, optarg, 16);
         line_2_set = true;
+        break;
+      case 't':
+        test_sequenz = true;
+        tests = true;
+        break;
+      case 's':
+        show_characters = true;
+        tests = true;
         break;
       case 'c':
         clear = true;
@@ -102,14 +116,16 @@ int main(int argc, char **argv)
     }
   }
 
-  if (!bcm2835_init()) return 1;
+  if (!bcm2835_init()) 
+    return 1;
 
   init_lcd();
 
   if (clear) 
     exit(EXIT_SUCCESS);
 
-  if (!(line_1_set || line_2_set)) {
+  if (test_sequenz) 
+  {
     strcpy(line_1, "Hallo");
     strcpy(line_2, "Ciao Bella!");
 
@@ -127,26 +143,26 @@ int main(int argc, char **argv)
 
     delay(1000);
 
-    shift_display(DISPLAY_SHIFT, SHIFT_RIGHT);
+    shift_display(SHIFT_RIGHT);
 
     delay(1000);
 
-    shift_display(DISPLAY_SHIFT, SHIFT_RIGHT);
+    shift_display(SHIFT_RIGHT);
 
     delay(1000);
 
-    shift_display(DISPLAY_SHIFT, SHIFT_RIGHT);
+    shift_display(SHIFT_RIGHT);
 
     delay(1000);
 
-    shift_display(CURSOR_SHIFT, SHIFT_LEFT);
+    shift_cursor(SHIFT_LEFT);
     write_string("?");
 
     delay(2000);
 
-    shift_display(DISPLAY_SHIFT, SHIFT_LEFT);
-    shift_display(DISPLAY_SHIFT, SHIFT_LEFT);
-    shift_display(DISPLAY_SHIFT, SHIFT_LEFT);
+    shift_display(SHIFT_LEFT);
+    shift_display(SHIFT_LEFT);
+    shift_display(SHIFT_LEFT);
 
     delay(2000);
 
@@ -158,7 +174,41 @@ int main(int argc, char **argv)
 
     write_string(line_2);   
   } 
-  else 
+  
+  if (show_characters)
+  {
+    // position in DDRAM
+    // 40 bytes per line
+    // 80 bytes max
+    ddram_position = 0;
+    set_cursor(LCD_LINE_1);
+    for (idx=0x20;idx<=0x7F;idx++)
+    {
+      // shift display after the first 8 characters
+      // because first display line is full
+
+      if (((ddram_position >= 16) && (ddram_position < 40)) || (ddram_position >= 56) )
+      {
+        shift_display(SHIFT_LEFT);
+      } 
+      if (ddram_position == 40) 
+      {
+        return_home();
+        set_cursor(LCD_LINE_2);
+      }
+      if (ddram_position == 80)
+      {
+        clear_lcd();
+        ddram_position = 0;
+      }   
+      printf("character %c at position %i\n", idx, ddram_position);
+      write_to_lcd(idx, LCD_DATA);
+      ddram_position += 1;
+      delay(200);
+    }
+  }
+
+  if (!tests) 
   {
     if (line_1_set) {
       set_cursor(LCD_LINE_1);
