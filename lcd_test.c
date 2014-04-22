@@ -17,6 +17,10 @@
 /*  -1 <text> sets the text of line 1 max 16 characters long.   */
 /*  -2 <text> sets the text of line 2 max 16 characters long.   */
 /*  -c clears both lines of the display.                        */
+/*  -t play test sequenz                                        */
+/*  -s show all display characters.                             */
+/*  -c clears both lines of the display.                        */
+/*  -p leave the text on the display. Cannot be used with -c    */
 /*                                                              */
 /* License:                                                     */
 /*                                                              */
