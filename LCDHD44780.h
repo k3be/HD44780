@@ -52,6 +52,7 @@
 
 // Define GPIO pin to LCD pin mapping
 #define LCD_RS RPI_V2_GPIO_P1_26
+#define LCD_RW RPI_V2_GPIO_P1_07
 #define LCD_E  RPI_V2_GPIO_P1_24
 #define LCD_D4 RPI_V2_GPIO_P1_22 
 #define LCD_D5 RPI_V2_GPIO_P1_18
